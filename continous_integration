@@ -1,0 +1,76 @@
+pipeline{
+agent any 
+parameters {
+  string defaultValue: 'master', description: 'Please select the Name of the branch', name: 'Branch'
+  choice choices: ['Dev', 'QA', 'PROD', 'UAT'], description: 'Please select the choice parameter', name: 'Choice'
+  booleanParam description: 'Please select yes to deploy', name: 'Deploy'
+}
+stages {
+stage("Verification"){
+steps{
+script{
+    echo "$Branch"
+    echo "$choice"
+	echo "$Deploy"
+       }
+      }
+     }
+stage("SCM"){
+steps{
+script{
+    echo 'Cloning Started'
+	git branch: '$Branch', credentialsId: 'New_github_passwd', url: 'https://github.com/naveen5758/sample_project.git'
+	echo 'Cloning completed'
+       }
+      }
+     }
+
+stage("BIULD or MAVEN"){
+steps{
+script{
+    echo 'Build Started'
+	sh 'mvn clean package'
+	echo 'Build completed'
+       }
+      }
+     }
+stage("Sonar-Qube"){
+steps{
+script{
+    echo 'Sonar-Qube Started'
+	echo 'Sonar-Qube completed'
+       }
+      }
+     }
+stage("Sonar-Scanner"){
+steps{
+script{
+    echo 'Sonar-Scanner Started'
+	echo 'Sonar-Scanner completed'
+       }
+      }
+     }
+stage("Artifactory"){
+steps{
+script{
+    echo 'Artifactory Started'
+	
+	echo 'Artifactory completed'
+       }
+      }
+     }
+stage("Calling CD Job"){
+steps{
+ script{
+      build job: 'continous-deployement', parameters: [
+	  string(name: 'Branch', value:"${params.Branch}"),
+	  string(name:'Deploy', value: "${params.Deploy}"),
+	  string(name:'Choice', value: "${params.Choice}")]
+     }
+    }
+  }
+    }
+  }
+  
+  
+

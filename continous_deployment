@@ -1,0 +1,56 @@
+pipeline{
+agent any
+parameters {
+  string(name: 'Choice',defaultValue: '',, description: 'Please select the name',trim: true)
+  string(name: 'Branch' ,defaultValue: '',, description: 'Please select the Branch')
+  string(name: 'Deploy', defaultValue: '', description: 'Please select the Deploy')
+}
+stages{
+stage("Verification"){
+steps{
+script{
+    echo "$Branch"
+    echo "$Choice"
+	echo "$Deploy"
+       }
+      }
+     }
+stage("Deployment"){
+      //when {
+        //expression{params.Deploy == "true" && params.Branch == master}
+        //}
+steps{
+script{
+    echo 'Deployment Started'
+   sh 'ssh root@172.31.1.114  /opt/tomcat/bin/shutdown.sh'
+   sh 'scp -r /var/lib/jenkins/workspace/continous-integration/target/citibank.war root@172.31.1.114:/opt/tomcat/webapps/'
+   sh 'ssh root@172.31.1.114  /opt/tomcat/bin/startup.sh'	
+	echo 'Deployment completed'
+       }
+     }
+	post{
+    success{
+        mail to: 'naveentanish2@gmail.com',
+        subject: "Job '${JOB_NAME}' (${BUILD_NUMBER}) is success",
+        body: "Please go to ${BUILD_URL} and verify the build is success or not"
+        }
+    failure{
+        mail to: 'naveentanish2@gmail.com',
+        subject: "Job '${JOB_NAME}' (${BUILD_NUMBER}) is failed",
+        body: "Please go to ${BUILD_URL} and verify the build"
+        }
+    always{
+        mail to: 'naveentanish2@gmail.com',
+    	subject: "Job '${JOB_NAME}' (${BUILD_NUMBER}) is always",
+    	body: "Please go to ${BUILD_URL} and this is always"
+       }
+      } 
+     }
+   }
+}
+
+
+
+	 
+	 
+
